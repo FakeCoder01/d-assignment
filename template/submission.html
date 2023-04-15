@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Available Hackathon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    const token = localStorage.getItem('token');
+    if(token == undefined) window.location.href= "login.html";
+    const uri = new URL(window.location.href);
+    if (uri.searchParams.get("id") == "") window.location.href= "index.html";
+    const id = uri.searchParams.get("id");
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<div class="bg-gradient-to-tr from-fuchsia-300 to-sky-500">
+    <h1 class="text-4xl text-center font-bold">Submissions</h1>
+
+    <section id="submission_section" class="w-full mx-auto min-h-screen ">
+            
+    </section>
+    <h6 id="msg_txt" class="mt-2"></h6>
+</div>
+
+<script>
+
+    const hackathon_section = document.getElementById('submission_section');
+    const message = document.getElementById('msg_txt');
+    var type_of_submission = "text";
+    fetch('http://127.0.0.1:8000/api/hackathon/' + id + '/submissions/', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${token}`
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+        throw new Error('Not found.');
+        }
+    })
+    .then(data => {
+        if (data.status_code === 200){
+            const submissions = data.submissions;
+            for(let i=0; i<submissions.length; i++){
+                const submission = submissions[i];
+ 
+                submission_section.innerHTML +=  `
+                <div class="w-1/2 bg-white rounded-sm block m-4 p-3">
+                    <div class="">
+                        <p class="text-slate-600 font-bold"> Name : ${submission.name}</p>
+                    </div>
+
+                    <div class="">
+                        <p class="text-blue-600 font-semibold"> Project : <a target="_blank" href="${submission.submission_url}">${submission.submission_url}</a></p>
+                    </div>
+                        
+                    <div class="">
+                        <p class="text-sm text-gray-600 font-light">Summary : ${submission.summary} </p>
+                    </div>
+
+                </div>`;
+            }
+
+
+        }
+        else{
+            message.innerHTML = '<div class="bg-red-200 text-red-700 p-2 rounded">Something went wrong wtf</div>';
+        }
+        })
+    .catch(error => {
+        console.log(error)
+        message.innerHTML = '<div class="bg-red-200 text-red-700 p-2 rounded">Something went wrong</div>';
+    });
+    
+
+
+  </script> 
+</body>
+</html>

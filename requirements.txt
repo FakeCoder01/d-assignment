@@ -1,0 +1,5 @@
+django
+submission
+django-cors-headers
+djangorestframework
+psycopg2

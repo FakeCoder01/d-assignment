@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Available Hackathon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<div class="bg-gradient-to-tr from-fuchsia-300 to-sky-500">
+    <h1 class="text-4xl font-bold my-3 text-center">All Available Hackathons</h1>
+    <section id="hackathons_section" class="p-3 min-h-screen ">
+    </section>
+    <h6 id="msg_txt" class="mt-2"></h6>
+</div>
+
+  <script>
+
+    const token = localStorage.getItem('token');
+    const hackathons_section = document.getElementById('hackathons_section');
+    const message = document.getElementById('msg_txt');
+
+
+
+        fetch('http://127.0.0.1:8000/api/hackathons/', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+            throw new Error('Error logging in.');
+            }
+        })
+        .then(data => {
+            data = JSON.parse(data);
+            if (data.status_code === 200){
+                const hackathons = data.hackathons;
+                for(i = 0; i<hackathons.length; i++){
+             
+                    const hackathon = hackathons[i];
+                   hackathons_section.innerHTML +=  `
+                        <a href="hackathon.html?id=${hackathon.id}" class="inline-block mx-4 my-3 bg-white rounded-lg p-4 shadow-sm shadow-indigo-100">
+                            <img
+                            alt="Hackathon Image"
+                            src="/media/${hackathon.hackathon_image}"
+                            class="h-56 w-full rounded-md object-cover"
+                            />
+                        
+                            <div class="mt-2">
+                            <dl>
+                                <div>
+                                <dt class="sr-only">Price</dt>
+                        
+                                <dd class="text-sm text-gray-500">${hackathon.reward_prize}</dd>
+                                </div>
+                        
+                                <div>
+                        
+                                <dd class="font-medium">${hackathon.title}</dd>
+                                </div>
+                            </dl>
+                        
+                            <div class="mt-6 flex items-center gap-8 text-xs">
+                                <div class="sm:inline-flex sm:shrink-0 sm:items-center sm:gap-2">
+
+                        
+                                <div class="mt-1.5 sm:mt-0">
+                                    <p class="text-gray-500">Submission</p>
+                        
+                                    <p class="font-medium">${hackathon.type_of_submission}</p>
+                                </div>
+                                </div>
+                        
+                                <div class="sm:inline-flex sm:shrink-0 sm:items-center sm:gap-2">
+                            
+       
+                        
+                                <div class="mt-1.5 sm:mt-0">
+                                    <p class="text-gray-500">Start date</p>
+                        
+                                    <p class="font-medium">${hackathon.start_time}</p>
+                                </div>
+                                </div>
+                        
+                                <div class="sm:inline-flex sm:shrink-0 sm:items-center sm:gap-2">
+                          
+                                <div class="mt-1.5 sm:mt-0">
+                                    <p class="text-gray-500">End date</p>
+                        
+                                    <p class="font-medium">${hackathon.end_time}</p>
+                                </div>
+                                </div>
+                            </div>
+                            </div>
+                        </a>
+                    `;
+
+                }
+
+            }else{
+                message.innerHTML = '<div class="bg-red-200 text-red-700 p-2 rounded">Something went wrong</div>';
+            }
+        })
+        .catch(error => {
+            message.innerHTML = '<div class="bg-red-200 text-red-700 p-2 rounded">Something went wrong</div>';
+        });
+
+
+
+  </script>
+</div>
+</body>
+</html>

@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Available Hackathon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    const token = localStorage.getItem('token');
+    if(token == undefined) window.location.href= "login.html";
+    const uri = new URL(window.location.href);
+    if (uri.searchParams.get("id") == "") window.location.href= "index.html";
+    const id = uri.searchParams.get("id");
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@themesberg/flowbite@1.2.0/dist/flowbite.min.css" />
+</head>
+<body>
+<div class="bg-gradient-to-tr from-fuchsia-300 to-sky-500">
+    <section id="hackathon_section" class=" min-h-screen ">
+   
+    </section>
+    <div id="authentication-modal" aria-hidden="true" class="hidden overflow-x-hidden overflow-y-auto fixed h-modal md:h-full top-4 left-0 right-0 md:inset-0 z-50 justify-center items-center">
+        <div class="relative w-full max-w-md px-4 h-full md:h-auto">
+            <!-- Modal content -->
+            <div class="bg-white rounded-lg shadow relative dark:bg-gray-700">
+                <div class="flex justify-end p-2">
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white" onclick="CloseModel()">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>  
+                    </button>
+                </div>
+                <form id="submit-form-for-submission" class="space-y-6 px-6 lg:px-8 pb-4 sm:pb-6 xl:pb-8" enctype="multipart/form-data">
+                    <h3 class="text-xl font-medium text-gray-900 dark:text-white">Submit Submission for the Hackathon</h3>
+                    <div>
+                        <label for="name" class="text-sm font-medium text-gray-900 block mb-2 dark:text-gray-300">Project name</label>
+                        <input type="text" name="name" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Main App" required="">
+                    </div>
+                    <div>
+                        <label for="description" class="text-sm font-medium text-gray-900 block mb-2 dark:text-gray-300">Summary</label>
+                        <textarea placeholder="Main app uses JS" name="description" id="description" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required=""></textarea>
+                    </div>
+
+                    <div id="project_upload"></div>
+                
+                    <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <span id="login_process_state" class="hidden">Submitting..</span>
+                        <span id="login_default_state">Submit<span id="subtotal"></span></span>
+                    </button>
+
+                </form>
+            </div>
+        </div>
+    </div> 
+    <h6 id="msg_txt" class="mt-2"></h6>
+</div>
+
+<script>
+
+    const hackathon_section = document.getElementById('hackathon_section');
+    const message = document.getElementById('msg_txt');
+    var type_of_submission = "text";
+    fetch('http://127.0.0.1:8000/api/hackathons/' + id + '/', {
+        method: 'GET',
+        headers: {
+            // 'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        /* body: JSON.stringify({
+            username: username,
+            password: password
+        }),
+            body: formData, */
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+        throw new Error('Not found.');
+        }
+    })
+    .then(data => {
+        data = JSON.parse(data);
+        if (data.status_code === 200){
+            const hackathon = data.hackathon;
+            hackathon_section.innerHTML =  `
+      
+                <div class="min-w-screen min-h-screen bg-yellow-300 flex items-center px-5 lg:p-10 overflow-hidden relative">
+                    <img src="http://localhost:8000/${hackathon.background_image}">
+                    <div class="w-full max-w-6xl rounded bg-white shadow-xl p-10 lg:px-20 mx-auto text-gray-800 relative md:text-left">
+                        <div class="md:flex items-center -mx-10">
+                            <div class="w-full md:w-1/2 px-10 mb-10 md:mb-0">
+                                <div class="relative">
+                                    <img src="http://localhost:8000/${hackathon.hackathon_image}" class="w-full relative z-10" alt="">
+                                    <div class="border-4 border-yellow-200 absolute top-10 bottom-10 left-10 right-10 z-0"></div>
+                                </div>
+                            </div>
+                            <div class="w-full md:w-1/2 px-10">
+                                <div class="mb-10">
+                                    <h1 class="font-bold uppercase text-2xl mb-2">${hackathon.title}</h1>
+                                    <h1 class="font-bold text-gray-500 text-xs mb-3">Start : ${data.timeline.start} <br> End &nbsp; : ${data.timeline.end}</h1>
+                                    <p class="">${hackathon.description}</p>
+                                </div>
+
+                                <div>
+                                    <div class="inline-block align-bottom mb-5">
+                                        <span class="font-bold text-2xl leading-none align-baseline">Reward</span><br>
+                                        <span class="text-sm leading-none align-baseline">${hackathon.reward_prize}</span>
+                                    </div>
+                                    <div class="inline-block align-bottom">
+                                        <button onclick="SubmitSubmission()" type="button" data-modal-toggle="authentication-modal" class="bg-yellow-300 opacity-75 hover:opacity-100 text-gray-900 hover:text-gray-900 rounded-full px-10 py-2 font-semibold">Submit now</button>
+                                    </div>    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            `;
+            
+            if (hackathon.type_of_submission != "link") type_of_submission = "file";
+            document.getElementById('project_upload').innerHTML = `
+                <label for="project" class="text-sm font-medium text-gray-900 block mb-2 dark:text-gray-300">Project ${hackathon.type_of_submission}</label>
+                <input type="${type_of_submission}" name="project" id="project" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Upload the project">
+            `;
+
+        }
+        else{
+            message.innerHTML = '<div class="bg-red-200 text-red-700 p-2 rounded">Something went wrong</div>';
+        }
+        })
+    .catch(error => {
+        message.innerHTML = '<div class="bg-red-200 text-red-700 p-2 rounded">Something went wrong</div>';
+    });
+    
+    function SubmitSubmission(){
+        document.getElementById("authentication-modal").classList.remove("hidden");
+        document.getElementById("authentication-modal").classList.add("flex");
+        document.getElementById("authentication-modal").setAttribute('aria-modal', true);
+    }
+    function CloseModel(){
+        document.getElementById("authentication-modal").classList.add("hidden");
+        document.getElementById("authentication-modal").classList.remove("flex");
+        document.getElementById("authentication-modal").setAttribute('aria-modal', false);
+    }
+
+
+    const form = document.getElementById('submit-form-for-submission');
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+  
+        document.getElementById("login_process_state").classList.remove("hidden");
+        document.getElementById("login_process_state").classList.add("animate-pulse");
+        document.getElementById("login_default_state").classList.add("hidden");
+  
+        const name = document.getElementById("name");
+        const description = document.getElementById("description");
+        const project = document.getElementById("project");
+
+
+
+
+        if (type_of_submission == "text"){
+            bodyData = {
+                name : name.value,
+                summary : description.value,
+                hackathon_id : id,
+                link : project.value,
+            }
+        }else if(type_of_submission == "file"){
+
+            const reader = new FileReader();
+            reader.readAsDataURL(project.files[0]);
+            reader.onload = function() {
+                const fileDataUrl = reader.result;
+                const fileBase64 = fileDataUrl.split(',')[1];
+                bodyData = {
+                    name : name.value,
+                    summary : description.value,
+                    hackathon_id : id,
+                    file : fileBase64,
+                }
+            }
+        }else{
+            const reader = new FileReader();
+            reader.readAsDataURL(project.files[0]);
+            reader.onload = function() {
+                const fileDataUrl = reader.result;
+                const fileBase64 = fileDataUrl.split(',')[1];
+                bodyData = {
+                    name : name.value,
+                    summary : description.value,
+                    hackathon_id : id,
+                    image : fileBase64,
+                }
+            }
+        }
+  
+        fetch('http://127.0.0.1:8000/api/submission/', {
+          method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${token}`
+            },
+            body: JSON.stringify(bodyData)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+              throw new Error('Error submiting form.');
+            }
+        })
+        .then(data => {
+            CloseModel();
+            message.innerHTML = '<div class="bg-green-200 text-green-700 p-2 rounded">Submiited in successfully!</div>';
+            hackathon_section.innerHTML = `<h1>YOUR SUBMISSION IS DONE</h1>`;
+            form.reset();
+        })
+        .catch(error => {
+          message.innerHTML = '<div class="bg-red-200 text-red-700 p-2 rounded">Error submiting form.</div>';
+        });
+      });
+
+  </script> 
+</body>
+<script src="https://unpkg.com/@themesberg/flowbite@1.2.0/dist/flowbite.bundle.js"></script>
+</html>
